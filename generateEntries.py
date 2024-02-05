@@ -1,8 +1,11 @@
 from openai import OpenAI
 from tqdm import tqdm
+from dotenv import load_dotenv
 import os
 
-client = OpenAI(api_key="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")
+load_dotenv()
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # This program will generate artifical journal entries for a range of dates.
 # The entries are stored in a folder in the same directory called `entries`.
@@ -13,12 +16,19 @@ def createEntry(date):
     completion = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[
-            {"role": "system", "content": "You are a 21 year old named Jason journalling about the events in his life."},
-            {"role": "user", "content": "Write about a day in the life of Jason on " + date + "."},
+            {
+                "role": "system",
+                "content": "You are a 21 year old named Jason journalling about the events in his life.",
+            },
+            {
+                "role": "user",
+                "content": "Write about a day in the life of Jason on " + date + ".",
+            },
         ],
     )
 
     return completion.choices[0].message.content
+
 
 def main():
     if not os.path.exists("entries"):
@@ -29,6 +39,7 @@ def main():
         entry = createEntry(date)
         with open("entries/entry-" + date + ".txt", "w") as file:
             file.write(entry)
+
 
 if __name__ == "__main__":
     main()
